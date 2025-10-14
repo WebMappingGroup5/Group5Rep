@@ -18,3 +18,5 @@ L.tileLayer(
     ]);
 
     var area = turf.area(polygon);
+ console.log(area);
+ 
