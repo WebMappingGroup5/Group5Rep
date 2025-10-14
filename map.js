@@ -6,3 +6,9 @@ L.tileLayer(
     attribution: '&copy; ' + mapLink + ' Contributors',
     maxZoom: 18,
     }).addTo(map);
+
+    var point1 = turf.point([29.8868, -97.9367]);
+    var point2 = turf.point([29.887379, -97.933741]);
+
+    var bearing = turf.bearing(point1, point2);
+    var bearing360 = (bearing + 360) % 360;
