@@ -6,3 +6,10 @@ L.tileLayer(
     attribution: '&copy; ' + mapLink + ' Contributors',
     maxZoom: 18,
     }).addTo(map);
+
+    var start = turf.point([-122, 48]);
+    var end = turf.point([-77, 39]);
+
+    var greatCircle = turf.greatCircle(start, end, {
+      properties: { name: "Seattle to DC" },
+    }).addTo(map);
