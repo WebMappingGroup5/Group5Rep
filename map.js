@@ -18,3 +18,4 @@ L.tileLayer(
     ]);
 
     var area = turf.area(polygon);
+L.geoJSON(polygon).addTo(map);
