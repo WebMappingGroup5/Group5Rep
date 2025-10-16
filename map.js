@@ -16,6 +16,7 @@ L.tileLayer(
         [125, -15],
       ],
     ]);
+    var area = turf.area(polygon);
     L.geoJSON(polygon,{
   style: {
       color: "red",
