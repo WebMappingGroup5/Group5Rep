@@ -1,18 +1,23 @@
 var map = L.map('map').setView([29.8884, -97.9384], 14);
 mapLink =
-    '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+    '<a href="https://openstreetmap.org">OpenStreetMap</a>';
 L.tileLayer(
-    'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; ' + mapLink + ' Contributors',
     maxZoom: 18,
     }).addTo(map);
 
+
+// Ali function
     var start = turf.point([-122, 48]);
     var end = turf.point([-77, 39]);
 
     var greatCircle = turf.greatCircle(start, end, {
       properties: { name: "Seattle to DC" },
-    }).addTo(map);
+    });
+    L.geoJSON(greatCircle,{style:{color:'blue', weight:2}}).addTo(map);
+
+//Ali function
 
     var polygon = turf.polygon([
       [
@@ -45,13 +50,12 @@ L.tileLayer(
 
 
 // Todd's Function
-function addgreatcircles(map)
-{
+
 const seattle = turf.point([-122.3, 47.6]);
-const dc   = turf.point([-77,38.9]);
+const philly   = turf.point([-75,39.9]);
 const austin  = turf.point([-97.7, 30.3]);
 
-const arc1 = turf.greatCircle(seattle, dc,
+const arc1 = turf.greatCircle(seattle, philly,
  {npoints:20, properties: {name: 'seattle to DC'}});
 const arc2 = turf.greatCircle(seattle, austin,
  {npoints:20, properties: {name: 'seattle to Austin'}});
@@ -95,4 +99,3 @@ L.marker([midpoint2.geometry.coordinates[1], midpoint2.geometry.coordinates[0]],
  L.marker([austin.geometry.coordinates[1],austin.geometry.coordinates[0]])
      .addTo(map)
      .bindTooltip('Austin TX',{permanent: true, direction: 'top'});
-}
