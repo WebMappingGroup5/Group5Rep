@@ -7,7 +7,10 @@ L.tileLayer(
     maxZoom: 18,
     }).addTo(map);
 
-const seattle = turf.point([-122.3, 47.6]);
+
+ function addgreatcircles(map)
+ {
+ const seattle = turf.point([-122.3, 47.6]);
 const dc   = turf.point([-77,38.9]);
 const austin  = turf.point([-97.7, 30.3]);
 
@@ -55,3 +58,4 @@ L.marker([midpoint2.geometry.coordinates[1], midpoint2.geometry.coordinates[0]],
   L.marker([austin.geometry.coordinates[1],austin.geometry.coordinates[0]])
       .addTo(map)
       .bindTooltip('Austin TX',{permanent: true, direction: 'top'});
+}
