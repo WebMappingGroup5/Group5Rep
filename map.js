@@ -14,3 +14,6 @@ L.tileLayer(
       [-97.947461, 29.890166]
     ])
     L.geoJson(pointsCollection).addTo(map);
+    var center = turf.center(pointsCollection);
+
+    L.geoJSON(center).addTo(map);
