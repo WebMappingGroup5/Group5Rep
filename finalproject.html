@@ -29,7 +29,7 @@
       // Basic Leaflet Map
       var map = L.map('map').setView([29.8884, -97.9384], 13);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
