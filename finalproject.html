@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map With Sidebar</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+
+    <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Full Screen Leaflet Map</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+
+    <link rel="stylesheet" href="style.css"/>
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+      <style>
+
+
+      </style>
+  </head>
+
+  <body>
+    <div id="header">
+      <h1>
+        Cave Dwellers
+      </h1>
+      Home
+    </div>
+      <!-- LEFT SIDEBAR -->
+      <div id="sidebar">
+        <a class="icon" href="#">
+        <img src='.git\Images\silhouette-black-bat-transparent-1753599158YEa.jpg' class="icon"> </a>
+          <a class="side-btn" href="#">About Us</a>
+          <a class="side-btn" href="#">Cave Info</a>
+          <a class="side-btn" href="#">Cave direction</a>
+          <a class="side-btn" href="#">Resources</a>
+
+      </div>
+
+      <!-- MAP -->
+      <div id="map"></div>
+
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+      <script>
+        // Basic map init
+        var map = L.map('map').setView([29.8884, -97.9384], 13);
+
+        // Tile layer
+        L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+      </script>
+
+  </body>
+  </html>

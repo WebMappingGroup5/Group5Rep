@@ -6,3 +6,72 @@ html, body, #map {
     height: 100%;
     width: 100%;
 }
+/* Reset + full screen */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+#header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  line-height: 50px;
+  font-size: 24px;
+  z-index: 9000; /* Above sidebar + map */
+}
+h1 {
+  color: #f7f7f7; padding: 0px; margin: 0;
+}
+/* Sidebar on left */
+#sidebar {
+  position: absolute;
+  top: 0px;              /* Push below header */
+  left: 0;
+  width: 200px;
+  height: 100%;
+  background: #333;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 10px;
+  gap: 10px;
+  z-index: 9001;
+}
+
+.icon {
+  width: 100px;
+  height: 100px;
+  object-fit: center;
+  padding: 0px 25px;
+}
+
+/* Buttons / links inside sidebar */
+.side-btn {
+  background: #34495e;
+  padding: 12px;
+  border-radius: 6px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.side-btn:hover {
+  background: #3d5a73;
+}
+
+/* Map shifted to the right of sidebar */
+#map {
+  position: absolute;
+  top: 100px;
+  left: 220px;     /* Same width as sidebar */
+  height: calc(100% - 100px);
+  width: calc(100% - 220px); /* Fill remaining space */
+  z-index: 1;
+}
