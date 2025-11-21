@@ -1,38 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Full Screen Leaflet Map</title>
+    <title>Map With Sidebar</title>
     <meta charset="utf-8" />
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
 
     <style>
-      /* Make the map fill the whole screen */
+      /* Reset + full screen */
       html, body {
         height: 100%;
         margin: 0;
-        padding: 0;
       }
-      #map {
+
+      /* Sidebar on left */
+      #sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 200px;       /* Sidebar width */
         height: 100%;
-        width: 100%;
+        background: #2c3e50;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 15px 10px;
+        gap: 10px;
+        z-index: 1000;      /* On top of map */
+      }
+
+      /* Buttons / links inside sidebar */
+      .side-btn {
+        background: #34495e;
+        padding: 12px;
+        border-radius: 6px;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 16px;
+      }
+
+      .side-btn:hover {
+        background: #3d5a73;
+      }
+
+      /* Map shifted to the right of sidebar */
+      #map {
+        position: absolute;
+        top: 0;
+        left: 200px;     /* Same width as sidebar */
+        height: 100%;
+        width: calc(100% - 200px); /* Fill remaining space */
       }
     </style>
 </head>
 
 <body>
+
+    <!-- LEFT SIDEBAR -->
+    <div id="sidebar">
+        <a class="side-btn" href="#">Function 1</a>
+        <a class="side-btn" href="#">Function 2</a>
+        <a class="side-btn" href="#">Redirect</a>
+        <a class="side-btn" href="https://google.com">Google</a>
+    </div>
+
+    <!-- MAP -->
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
     <script>
-      // Basic Leaflet Map
+      // Basic map init
       var map = L.map('map').setView([29.8884, -97.9384], 13);
 
-      L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+      // Tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
     </script>
+
 </body>
 </html>
