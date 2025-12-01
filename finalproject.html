@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
       /* Reset + full screen */
@@ -64,6 +65,10 @@
         <a class="side-btn" href="#">Function 2</a>
         <a class="side-btn" href="#">Redirect</a>
         <a class="side-btn" href="https://google.com">Google</a>
+
+
+
+
     </div>
 
     <!-- MAP -->
@@ -80,6 +85,57 @@
           maxZoom: 19,
           attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
+
+      function loadCsv(url) {
+              Papa.parse(url, {
+                download: true,
+                header: false,
+                complete: function(results) {
+
+                  results.data.forEach(row => {
+                    if (row.length < 5) return;
+
+                    const lon = parseFloat(row[3]);
+                    const lat = parseFloat(row[4]);
+
+                    if (isNaN(lat) || isNaN(lon)) return;
+
+                    const name = row[1] || "Unknown Location";
+                    const link = row[2];
+
+                    let popupHtml = `<strong>${name}</strong><br>`;
+                    if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
+                    popupHtml += `Lat: ${lat}, Lon: ${lon}`;
+
+                    L.marker([lat, lon])
+                      .addTo(map)
+                      .bindPopup(popupHtml);
+                  });
+                }
+              });
+            }
+
+            // ============================
+            // LOAD ALL YOUR CSV FILES
+            // ============================
+            const csvFiles = [
+              "wonder.csv",
+              "longhorn.csv",
+              "cascade.csv",
+              "noname.csv",
+              "sonora.csv",
+              "space.csv",
+              "bridge.csv"
+            ];
+
+            csvFiles.forEach(loadCsv);
+
+
+
+
+
+
+
     </script>
 
 </body>
