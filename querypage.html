@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map With Sidebar</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+      /* Reset + full screen */
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+
+      /* Sidebar on left */
+      #sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 200px;       /* Sidebar width */
+        height: 100%;
+        background: #2c3e50;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 15px 10px;
+        gap: 10px;
+        z-index: 1000;      /* On top of map */
+      }
+
+      /* Buttons / links inside sidebar */
+      .side-btn {
+        background: #34495e;
+        padding: 12px;
+        border-radius: 6px;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 16px;
+      }
+
+      .side-btn:hover {
+        background: #3d5a73;
+      }
+
+      /* Map shifted to the right of sidebar */
+      #map {
+        position: absolute;
+        top: 0;
+        left: 200px;     /* Same width as sidebar */
+        height: 100%;
+        width: calc(100% - 200px); /* Fill remaining space */
+      }
+    </style>
+</head>
+
+<body>
+
+    <!-- LEFT SIDEBAR -->
+    <div id="sidebar">
+        <a class="side-btn" href="#">Main Page</a>
+        <a class="side-btn" href="#">Filter Caves by Attribute</a>
+        <a class="side-btn" href="#">Directions</a>
+        <a class="side-btn" href="https://google.com">About us</a>
+
+
+
+
+    </div>
+
+    <!-- MAP -->
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+
+      // Basic map init
+      var map = L.map('map').setView([29.8884, -97.9384], 13);
+
+      // Tile layer
+      L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+    const allLocations = [];
+      function loadCsv(url) {
+              Papa.parse(url, {
+                download: true,
+                header: false,
+                complete: function(results) {
+
+                  results.data.forEach(row => {
+                    if (row.length < 5) return;
+
+                    const lon = parseFloat(row[3]);
+                    const lat = parseFloat(row[4]);
+
+                    if (isNaN(lat) || isNaN(lon)) return;
+
+                    const name = row[1] || "Unknown Location";
+                    const link = row[2];
+                    const price = row[5];
+                    const length = row[6];
+                    const depth = row [7];
+                    const kidstuff = row[8];
+                    const adventure = row[9];
+                    const time = row[10];
+                    const eco = row[11];
+
+                    let popupHtml = `<strong>${name}</strong><br>`;
+                    if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
+                    popupHtml += `Lat: ${lat}, Lon: ${lon}`;
+
+                  const marker =  L.marker([lat, lon])
+                      .addTo(map)
+                      .bindPopup(popupHtml);
+
+                    allLocations.push({
+                       marker,
+                       name,
+                       link,
+                       price,
+                       length,
+                       depth,
+                       kidstuff,
+                       adventure,
+                       time,
+                       eco,
+                       lat,
+                       lon
+                  });
+                });
+                }
+              });
+            }
+
+            // ============================
+            // LOAD ALL YOUR CSV FILES
+            // ============================
+            const csvFiles = [
+              "wonder.csv",
+              "longhorn.csv",
+              "cascade.csv",
+              "noname.csv",
+              "sonora.csv",
+              "space.csv",
+              "bridge.csv"
+            ];
+
+            csvFiles.forEach(loadCsv);
+
+
+
+
+
+
+
+    </script>
+
+</body>
+</html>
