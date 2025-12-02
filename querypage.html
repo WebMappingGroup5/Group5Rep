@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
       /* Reset + full screen */
@@ -19,7 +19,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 200px;       /* Sidebar width */
+        width: 240px;       /* Sidebar width */
         height: 100%;
         background: #2c3e50;
         color: white;
@@ -27,32 +27,52 @@
         flex-direction: column;
         padding: 15px 10px;
         gap: 10px;
-        z-index: 1000;      /* On top of map */
+        z-index: 1000;
+        box-sizing: border-box;
       }
 
-      /* Buttons / links inside sidebar */
       .side-btn {
         background: #34495e;
-        padding: 12px;
+        padding: 8px 10px;
         border-radius: 6px;
         color: white;
         text-align: center;
         cursor: pointer;
         text-decoration: none;
-        font-size: 16px;
+        font-size: 14px;
+        border: none;
       }
 
       .side-btn:hover {
         background: #3d5a73;
       }
 
+      .filter-group {
+        font-size: 13px;
+      }
+
+      .filter-group label {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .filter-group input[type="number"] {
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 6px;
+      }
+
+      .filter-group .checkbox-row {
+        margin-bottom: 4px;
+      }
+
       /* Map shifted to the right of sidebar */
       #map {
         position: absolute;
         top: 0;
-        left: 200px;     /* Same width as sidebar */
+        left: 240px;     /* Same width as sidebar */
         height: 100%;
-        width: calc(100% - 200px); /* Fill remaining space */
+        width: calc(100% - 240px);
       }
     </style>
 </head>
@@ -61,14 +81,48 @@
 
     <!-- LEFT SIDEBAR -->
     <div id="sidebar">
-        <a class="side-btn" href="#">Main Page</a>
-        <a class="side-btn" href="#">Filter Caves by Attribute</a>
-        <a class="side-btn" href="#">Directions</a>
-        <a class="side-btn" href="https://google.com">About us</a>
 
+          <a class="side-btn" href="finalproject.html">Main Page</a>
+          <a class="side-btn" href="querypage.html">Filter Caves by Attribute</a>
+          <a class="side-btn" href="directions.html">Directions</a>
+          <a class="side-btn" href="aboutus.html">About Us</a>
 
+        <div class="filter-group">
+          <strong>Filter caves</strong><br>
 
+          <label for="filter-price">Max price ($):</label>
+          <input type="number" id="filter-price" min="0" step="1" />
 
+          <label>Tour time (minutes):</label>
+          <input type="number" id="filter-time-min" placeholder="Min time" min="0" step="1" />
+          <input type="number" id="filter-time-max" placeholder="Max time" min="0" step="1" />
+
+          <div class="checkbox-row">
+            <label>
+              <input type="checkbox" id="filter-kid" />
+              Kid-friendly only
+            </label>
+          </div>
+
+          <div class="checkbox-row">
+            <label>
+              <input type="checkbox" id="filter-adventure" />
+              Adventure-focused only
+            </label>
+          </div>
+
+          <div class="checkbox-row">
+            <label>
+              <input type="checkbox" id="filter-eco" />
+              Eco / educational only
+            </label>
+          </div>
+        </div>
+
+        <button class="side-btn" id="apply-filters">Apply filters</button>
+        <button class="side-btn" id="reset-filters">Reset filters</button>
+
+        <a class="side-btn" href="https://google.com" target="_blank">Google</a>
     </div>
 
     <!-- MAP -->
@@ -77,7 +131,6 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
     <script>
-
       // Basic map init
       var map = L.map('map').setView([29.8884, -97.9384], 13);
 
@@ -86,79 +139,187 @@
           maxZoom: 19,
           attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
-    const allLocations = [];
+
+      // Store all markers + data
+      const allLocations = [];
+
+      // Helper: interpret 1/0, true/false, yes/no as boolean
+      function isTrueFlag(val) {
+        if (val === undefined || val === null) return false;
+        const s = String(val).trim().toLowerCase();
+        return s === "1" || s === "true" || s === "yes";
+      }
+
       function loadCsv(url) {
-              Papa.parse(url, {
-                download: true,
-                header: false,
-                complete: function(results) {
+        Papa.parse(url, {
+          download: true,
+          header: false,
+          complete: function(results) {
 
-                  results.data.forEach(row => {
-                    if (row.length < 5) return;
+            results.data.forEach(row => {
+              if (row.length < 5) return;
 
-                    const lon = parseFloat(row[3]);
-                    const lat = parseFloat(row[4]);
+              const lon = parseFloat(row[3]);
+              const lat = parseFloat(row[4]);
 
-                    if (isNaN(lat) || isNaN(lon)) return;
+              if (isNaN(lat) || isNaN(lon)) return;
 
-                    const name = row[1] || "Unknown Location";
-                    const link = row[2];
-                    const price = row[5];
-                    const length = row[6];
-                    const depth = row [7];
-                    const kidstuff = row[8];
-                    const adventure = row[9];
-                    const time = row[10];
-                    const eco = row[11];
+              const name      = row[1] || "Unknown Location";
+              const link      = row[2];
+              const price     = row[5];  // number (ticket price)
+              const length    = row[6];  // (not used in filters yet)
+              const depth     = row[7];
+              const kidstuff  = row[8];  // true/false-like
+              const adventure = row[9];  // true/false-like
+              const time      = row[10]; // minutes
+              const eco       = row[11]; // true/false-like
 
-                    let popupHtml = `<strong>${name}</strong><br>`;
-                    if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
-                    popupHtml += `Lat: ${lat}, Lon: ${lon}`;
+              let popupHtml = `<strong>${name}</strong><br>`;
+              if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
 
-                  const marker =  L.marker([lat, lon])
-                      .addTo(map)
-                      .bindPopup(popupHtml);
+              if (price) popupHtml += `Price: $${price}<br>`;
+              if (time)  popupHtml += `Tour time: ${time} min<br>`;
+              if (depth) popupHtml += `Depth: ${depth} ft<br>`;
 
-                    allLocations.push({
-                       marker,
-                       name,
-                       link,
-                       price,
-                       length,
-                       depth,
-                       kidstuff,
-                       adventure,
-                       time,
-                       eco,
-                       lat,
-                       lon
-                  });
-                });
-                }
+              // Optional flags display
+              popupHtml += `Kid-friendly: ${isTrueFlag(kidstuff) ? "Yes" : "No"}<br>`;
+              popupHtml += `Adventure: ${isTrueFlag(adventure) ? "Yes" : "No"}<br>`;
+              popupHtml += `Eco / Educational: ${isTrueFlag(eco) ? "Yes" : "No"}<br>`;
+
+              popupHtml += `Lat: ${lat}, Lon: ${lon}`;
+
+              const marker = L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup(popupHtml);
+
+              allLocations.push({
+                marker,
+                name,
+                link,
+                price,
+                length,
+                depth,
+                kidstuff,
+                adventure,
+                time,
+                eco,
+                lat,
+                lon
               });
+            });
+          }
+        });
+      }
+
+      // Load all your CSV files
+      const csvFiles = [
+        "wonder.csv",
+        "longhorn.csv",
+        "cascade.csv",
+        "noname.csv",
+        "sonora.csv",
+        "space.csv",
+        "bridge.csv"
+      ];
+
+      csvFiles.forEach(loadCsv);
+
+      // ---------- FILTER LOGIC ----------
+
+      function applyFilters() {
+        const priceInput   = document.getElementById("filter-price").value;
+        const minTimeInput = document.getElementById("filter-time-min").value;
+        const maxTimeInput = document.getElementById("filter-time-max").value;
+
+        const kidOnly  = document.getElementById("filter-kid").checked;
+        const advOnly  = document.getElementById("filter-adventure").checked;
+        const ecoOnly  = document.getElementById("filter-eco").checked;
+
+        const maxPrice = priceInput   ? parseFloat(priceInput)   : null;
+        const minTime  = minTimeInput ? parseFloat(minTimeInput) : null;
+        const maxTime  = maxTimeInput ? parseFloat(maxTimeInput) : null;
+
+        allLocations.forEach(loc => {
+          let visible = true;
+
+          // Max price filter
+          if (maxPrice !== null) {
+            const p = parseFloat(loc.price);
+            if (isNaN(p) || p > maxPrice) {
+              visible = false;
             }
+          }
 
-            // ============================
-            // LOAD ALL YOUR CSV FILES
-            // ============================
-            const csvFiles = [
-              "wonder.csv",
-              "longhorn.csv",
-              "cascade.csv",
-              "noname.csv",
-              "sonora.csv",
-              "space.csv",
-              "bridge.csv"
-            ];
+          // Tour time min/max filter
+          if (minTime !== null || maxTime !== null) {
+            const t = parseFloat(loc.time);
+            // If time is missing or invalid, fail the time filter
+            if (isNaN(t)) {
+              visible = false;
+            } else {
+              if (minTime !== null && t < minTime) {
+                visible = false;
+              }
+              if (maxTime !== null && t > maxTime) {
+                visible = false;
+              }
+            }
+          }
 
-            csvFiles.forEach(loadCsv);
+          // Kid-friendly filter
+          if (kidOnly) {
+            if (!isTrueFlag(loc.kidstuff)) {
+              visible = false;
+            }
+          }
 
+          // Adventure filter
+          if (advOnly) {
+            if (!isTrueFlag(loc.adventure)) {
+              visible = false;
+            }
+          }
 
+          // Eco filter
+          if (ecoOnly) {
+            if (!isTrueFlag(loc.eco)) {
+              visible = false;
+            }
+          }
 
+          // Show / hide marker
+          if (visible) {
+            if (!map.hasLayer(loc.marker)) {
+              loc.marker.addTo(map);
+            }
+          } else {
+            if (map.hasLayer(loc.marker)) {
+              map.removeLayer(loc.marker);
+            }
+          }
+        });
+      }
 
+      function resetFilters() {
+        // Clear form inputs
+        document.getElementById("filter-price").value = "";
+        document.getElementById("filter-time-min").value = "";
+        document.getElementById("filter-time-max").value = "";
+        document.getElementById("filter-kid").checked = false;
+        document.getElementById("filter-adventure").checked = false;
+        document.getElementById("filter-eco").checked = false;
 
+        // Show all markers
+        allLocations.forEach(loc => {
+          if (!map.hasLayer(loc.marker)) {
+            loc.marker.addTo(map);
+          }
+        });
+      }
 
-
+      // Hook buttons
+      document.getElementById("apply-filters").addEventListener("click", applyFilters);
+      document.getElementById("reset-filters").addEventListener("click", resetFilters);
     </script>
 
 </body>
