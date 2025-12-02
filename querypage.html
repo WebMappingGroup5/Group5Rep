@@ -178,13 +178,13 @@
               if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
 
               if (price) popupHtml += `Price: $${price}<br>`;
-              if (time)  popupHtml += `Tour time: ${time} min<br>`;
-              if (depth) popupHtml += `Depth: ${depth} ft<br>`;
+              if (time)  popupHtml += `Tour time: ${time} minutes<br>`;
+              if (depth) popupHtml += `Depth: ${depth} feet<br>`;
 
               // Optional flags display
-              popupHtml += `Kid-friendly: ${isTrueFlag(kidstuff) ? "Yes" : "No"}<br>`;
-              popupHtml += `Adventure: ${isTrueFlag(adventure) ? "Yes" : "No"}<br>`;
-              popupHtml += `Eco / Educational: ${isTrueFlag(eco) ? "Yes" : "No"}<br>`;
+              popupHtml += `Surface Activities: ${isTrueFlag(kidstuff) ? "Yes" : "No"}<br>`;
+              popupHtml += `Adventure Option: ${isTrueFlag(adventure) ? "Yes" : "No"}<br>`;
+              popupHtml += `Unique/Rare Species: ${isTrueFlag(eco) ? "Yes" : "No"}<br>`;
 
               popupHtml += `Lat: ${lat}, Lon: ${lon}`;
 
