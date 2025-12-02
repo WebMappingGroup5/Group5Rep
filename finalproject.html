@@ -77,6 +77,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
     <script>
+
       // Basic map init
       var map = L.map('map').setView([29.8884, -97.9384], 13);
 
@@ -85,7 +86,7 @@
           maxZoom: 19,
           attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
-
+    const allLocations = [];
       function loadCsv(url) {
               Papa.parse(url, {
                 download: true,
@@ -102,15 +103,37 @@
 
                     const name = row[1] || "Unknown Location";
                     const link = row[2];
+                    const price = row[5];
+                    const length = row[6];
+                    const depth = row [7];
+                    const kidstuff = row[8];
+                    const adventure = row[9];
+                    const time = row[10];
+                    const eco = row[11];
 
                     let popupHtml = `<strong>${name}</strong><br>`;
                     if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
                     popupHtml += `Lat: ${lat}, Lon: ${lon}`;
 
-                    L.marker([lat, lon])
+                  const marker =  L.marker([lat, lon])
                       .addTo(map)
                       .bindPopup(popupHtml);
+
+                    allLocations.push({
+                       marker,
+                       name,
+                       link,
+                       price,
+                       length,
+                       depth,
+                       kidstuff,
+                       adventure,
+                       time,
+                       eco,
+                       lat,
+                       lon
                   });
+                });
                 }
               });
             }
