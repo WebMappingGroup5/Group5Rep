@@ -1,164 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Map With Sidebar</title>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
+    <title>Cave Dwellers Map</title>
 
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-    <style>
-      /* Reset + full screen */
-      html, body {
-        height: 100%;
-        margin: 0;
-      }
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.0/dist/leaflet-routing-machine.css"/>
 
-      /* Sidebar on left */
-      #sidebar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 200px;       /* Sidebar width */
-        height: 100%;
-        background: #2c3e50;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        padding: 15px 10px;
-        gap: 10px;
-        z-index: 1000;      /* On top of map */
-      }
+    <!-- Geocoder CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
 
-      /* Buttons / links inside sidebar */
-      .side-btn {
-        background: #34495e;
-        padding: 12px;
-        border-radius: 6px;
-        color: white;
-        text-align: center;
-        cursor: pointer;
-        text-decoration: none;
-        font-size: 16px;
-      }
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-      .side-btn:hover {
-        background: #3d5a73;
-      }
-
-      /* Map shifted to the right of sidebar */
-      #map {
-        position: absolute;
-        top: 0;
-        left: 200px;     /* Same width as sidebar */
-        height: 100%;
-        width: calc(100% - 200px); /* Fill remaining space */
-      }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <!-- LEFT SIDEBAR -->
-    <div id="sidebar">
-        <a class="side-btn" href="#">Main Page</a>
-        <a class="side-btn" href="#">Filter Caves by Attribute</a>
-        <a class="side-btn" href="#">Directions</a>
-        <a class="side-btn" href="https://google.com">About Us</a>
-
-
-
-
+    <!-- Header -->
+    <div id="header">
+        <h1>Cave Dwellers</h1>
+        <h2>Directions</h2>
     </div>
 
-    <!-- MAP -->
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <a class="icon" href="finalproject.html">
+            <img src=".git/Images/silhouette-black-bat-transparent-1753599158YEa.jpg" class="icon">
+        </a>
+        <a class="side-btn" href="querypage.html">Filter Caves by Attribute</a>
+        <a class="side-btn" href="directions.html">Directions</a>
+        <a class="side-btn" href="aboutus.html">About Us</a>
+    </div>
+
+    <!-- Map -->
     <div id="map"></div>
 
+    <!-- Address Search Box -->
+    <input id="searchBox" type="text" placeholder="Search for an address...">
+
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.0/dist/leaflet-routing-machine.js"></script>
+
+    <!-- Geocoder JS -->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
     <script>
 
-      // Basic map init
+      /* -------------------------
+         MAP INITIALIZATION
+      -------------------------- */
       var map = L.map('map').setView([30.20, -98.987], 8.7);
 
-      // Tile layer
       L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; OpenStreetMap contributors'
+          maxZoom: 19
       }).addTo(map);
-    const allLocations = [];
+
+      const allLocations = [];
+      let routeControl = null;
+      let selectedCavePoint = null;   // route end point
+      let searchStartPoint = null;    // route start point (address)
+
+
+      /* -------------------------
+         LOAD CSV MARKERS
+      -------------------------- */
       function loadCsv(url) {
-              Papa.parse(url, {
-                download: true,
-                header: false,
-                complete: function(results) {
+        Papa.parse(url, {
+          download: true,
+          header: false,
+          complete: function(results) {
+            results.data.forEach(row => {
+              if (row.length < 5) return;
 
-                  results.data.forEach(row => {
-                    if (row.length < 5) return;
+              const lon = parseFloat(row[3]);
+              const lat = parseFloat(row[4]);
+              if (isNaN(lat) || isNaN(lon)) return;
 
-                    const lon = parseFloat(row[3]);
-                    const lat = parseFloat(row[4]);
+              const name = row[1] || "Unknown Cave";
+              const link = row[2];
 
-                    if (isNaN(lat) || isNaN(lon)) return;
+              let popupHtml = `<strong>${name}</strong><br>`;
+              if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
+              popupHtml += `Lat: ${lat}, Lon: ${lon}`;
 
-                    const name = row[1] || "Unknown Location";
-                    const link = row[2];
-                    const price = row[5];
-                    const length = row[6];
-                    const depth = row [7];
-                    const kidstuff = row[8];
-                    const adventure = row[9];
-                    const time = row[10];
-                    const eco = row[11];
+              const marker = L.marker([lat, lon]).addTo(map).bindPopup(popupHtml);
 
-                    let popupHtml = `<strong>${name}</strong><br>`;
-                    if (link) popupHtml += `<a href="${link}" target="_blank">Website</a><br>`;
-                    popupHtml += `Lat: ${lat}, Lon: ${lon}`;
-
-                  const marker =  L.marker([lat, lon])
-                      .addTo(map)
-                      .bindPopup(popupHtml);
-
-                    allLocations.push({
-                       marker,
-                       name,
-                       link,
-                       price,
-                       length,
-                       depth,
-                       kidstuff,
-                       adventure,
-                       time,
-                       eco,
-                       lat,
-                       lon
-                  });
-                });
+              marker.on("click", () => {
+                selectedCavePoint = L.latLng(lat, lon);
+                if (searchStartPoint) {
+                  buildRoute();
+                } else {
+                  alert("Now search an address to route from.");
                 }
               });
-            }
 
-            // ============================
-            // LOAD ALL YOUR CSV FILES
-            // ============================
-            const csvFiles = [
-              "wonder.csv",
-              "longhorn.csv",
-              "cascade.csv",
-              "noname.csv",
-              "sonora.csv",
-              "space.csv",
-              "bridge.csv"
-            ];
+              allLocations.push({marker, name, link, lat, lon});
+            });
+          }
+        });
+      }
 
-            csvFiles.forEach(loadCsv);
+      const csvFiles = ["wonder.csv","longhorn.csv","cascade.csv","noname.csv","sonora.csv","space.csv","bridge.csv"];
+      csvFiles.forEach(loadCsv);
 
 
 
+      /* -------------------------
+         ADDRESS SEARCH (Nominatim)
+      -------------------------- */
+      async function geocodeAddress(query) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.length) return null;
+
+        return {
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon),
+          label: data[0].display_name
+        };
+      }
+
+      document.getElementById("searchBox").addEventListener("keydown", async function(e) {
+        if (e.key === "Enter") {
+          const query = this.value.trim();
+          if (!query) return;
+
+          const result = await geocodeAddress(query);
+          if (!result) {
+            alert("Address not found!");
+            return;
+          }
+
+          searchStartPoint = L.latLng(result.lat, result.lon);
+
+          L.marker(searchStartPoint)
+            .addTo(map)
+            .bindPopup(result.label)
+            .openPopup();
+
+          map.setView(searchStartPoint, 12);
+
+          if (selectedCavePoint) buildRoute();
+        }
+      });
 
 
+      /* -------------------------
+         ROUTING FUNCTION
+      -------------------------- */
+function buildRoute() {
+    if (!searchStartPoint || !selectedCavePoint) return;
 
+    if (routeControl) map.removeControl(routeControl);
 
+    routeControl = L.Routing.control({
+        waypoints: [
+            searchStartPoint,
+            selectedCavePoint
+        ],
+        lineOptions: { addWaypoints: false },
+        createMarker: () => null,
+        position: 'bottomleft'
+    }).addTo(map);
+
+    // Move routing panel above search box
+    setTimeout(() => {
+        const controlContainer = routeControl.getContainer();
+        if (!controlContainer) return;
+
+        // 20px above bottom + 20px offset from search box
+        controlContainer.style.marginBottom = '40px';
+    }, 100);
+}
     </script>
 
 </body>

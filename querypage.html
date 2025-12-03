@@ -8,45 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
-      /* Reset + full screen */
-      html, body {
-        height: 100%;
-        margin: 0;
-      }
-
-      /* Sidebar on left */
-      #sidebar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 240px;       /* Sidebar width */
-        height: 100%;
-        background: #2c3e50;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        padding: 15px 10px;
-        gap: 10px;
-        z-index: 1000;
-        box-sizing: border-box;
-      }
-
-      .side-btn {
-        background: #34495e;
-        padding: 8px 10px;
-        border-radius: 6px;
-        color: white;
-        text-align: center;
-        cursor: pointer;
-        text-decoration: none;
-        font-size: 14px;
-        border: none;
-      }
-
-      .side-btn:hover {
-        background: #3d5a73;
-      }
-
       .filter-group {
         font-size: 13px;
       }
@@ -65,33 +26,32 @@
       .filter-group .checkbox-row {
         margin-bottom: 4px;
       }
-
-      /* Map shifted to the right of sidebar */
-      #map {
-        position: absolute;
-        top: 0;
-        left: 240px;     /* Same width as sidebar */
-        height: 100%;
-        width: calc(100% - 240px);
-      }
     </style>
- </head>
-
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
 
-    <!-- LEFT SIDEBAR -->
-    <div id="sidebar">
+    <!-- Header -->
+    <div id="header">
+        <h1>Cave Dwellers</h1>
+        <h2>Query Page</h2>
+    </div>
 
-          <a class="side-btn" href="finalproject.html">Main Page</a>
-          <a class="side-btn" href="querypage.html">Filter Caves by Attribute</a>
-          <a class="side-btn" href="directions.html">Directions</a>
-          <a class="side-btn" href="aboutus.html">About Us</a>
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <a class="icon" href="finalproject.html">
+            <img src=".git/Images/silhouette-black-bat-transparent-1753599158YEa.jpg" class="icon">
+        </a>
+        <a class="side-btn" href="querypage.html">Filter Caves by Attribute</a>
+        <a class="side-btn" href="directions.html">Directions</a>
+        <a class="side-btn" href="aboutus.html">About Us</a>
 
         <div class="filter-group">
           <strong>Filter caves</strong><br>
 
           <label for="filter-price">Max price ($):</label>
-          <input type="number" id="filter-price" min="0" step="1" />
+          <input type="number" id="filter-price" min="0" step="5" />
 
           <label>Tour time (minutes):</label>
           <input type="number" id="filter-time-min" placeholder="Minimum time" min="0" step="5" />
